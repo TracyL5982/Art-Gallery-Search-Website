@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Object {{summary.accession_no}}</title>
+</head>
+<body>
+    <div>
+        <h2>Summary</h2>
+        <table>
+            <thead>
+                <tr>
+                    <td>Accession no.</td>
+                    <td>Date</td>
+                    <td>Place</td>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ summary.accession_no }}</td>
+                <td>{{ summary.date }}</td>
+                <td>{{ summary.place }}</td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+
+
+    <div>
+        <h2>Label</h2>
+        {{label}}
+    </div>
+
+    <div>
+        <h2>Produced By</h2>
+        <table>
+            <thead>
+                <tr>
+                    <td>Part</td>
+                    <td>Name</td>
+                    <td>Nationalities</td>
+                    <td>Timespan</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for x in producers %}
+                    <tr>
+                        <td>{{x.part}}</td>
+                        <td>{{x.name}}</td>
+                        <td>{{x.nationalities}}</td>
+                        {% if not x.timespan %}
+                            <td>Unknown</td>
+                        {% else %}
+                            <td>{{x.timespan}}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if img_url %}
+    <div>
+        <h2>Image</h2>
+        <img src={{img_url.rstrip("/")}} >
+    </div>
+    {% endif %}
+
+    <div>
+        <h2>Classified As</h2>
+        <ul>
+            {% for x in classified_as %}
+                <li>{{x}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h2>Information</h2>
+        <ul>
+            {% for reference in references %}
+            <li><strong>{{ reference.type }}:</strong> {{ reference.content | safe }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</body>
+</html>

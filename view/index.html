@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}YUAG Collection Search{% endblock %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+    <h1>YUAG Collection Search</h1>
+    <form>
+        {% include 'search_form.html' %}
+    </form>
+    {% include 'search_result.html' %}
+{% endblock %}
+
+{% block scripts %}
+    <!-- Specific scripts for index.html -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function searchObjects() {
+                // Clear previous results
+                $("#resultTable tbody").empty();
+                var label = $('#l').val().trim(),
+                    agent = $('#a').val().trim(),
+                    classification = $('#c').val().trim(),
+                    date = $('#d').val().trim();
+
+                // Check if all inputs are empty
+                if (!(label || agent || classification || date)) {
+                    $("#resultTable").hide();
+                    alert("No search terms provided. Please enter some search terms.");
+                    return;
+                }
+
+                $.ajax({
+                    url: '/search',
+                    type: 'get',
+                    data: {
+                        l: $('#l').val(),
+                        a: $('#a').val(),
+                        c: $('#c').val(),
+                        d: $('#d').val()
+                    },
+                    success: function(data) {
+                        if (data.error) {
+                            // Handle the error response for no search terms
+                            $('#resultTable tbody').append('<tr><td colspan="4">' + data.error + '</td></tr>');
+                        } else {
+                            var count = 0;
+                            $.each(data, function(index, artwork) {
+                                if (count < 1000) {
+                                    let labelLink = $('<a></a>')
+                                                    .attr('href', `obj/${artwork.id}`)
+                                                    .attr('target', '_blank')
+                                                    .text(artwork.label);
+                                    let row = $('<tr></tr>');
+                                    row.append($('<td></td>').append(labelLink));
+                                    row.append($('<td></td>').text(artwork.date));
+                                    row.append($('<td></td>').text(artwork.agent));
+                                    row.append($('<td></td>').text(artwork.classification));
+                                    row.append($('<td></td>').addClass('hidden-col').text(artwork.id));
+                                    $('#resultTable tbody').append(row);
+                                            count++;
+                                }
+                            });
+                            $('#resultTable').show();
+                            $('.hidden-col').hide();
+                        }
+                        let queryParams = new URLSearchParams({
+                            l: $('#l').val(),
+                            a: $('#a').val(),
+                            c: $('#c').val(),
+                            d: $('#d').val()
+                        }).toString();
+
+                        window.history.pushState({}, '', '/search?' + queryParams);
+                    },
+                    error: function() {
+                        console.error('Error fetching data');
+                    }
+                });
+            }
+
+            $('#resultTable').hide();
+            $('#l, #d, #a, #c').on('keyup', function() {
+                searchObjects();
+            });
+
+            let prevInputs = localStorage.getItem("inputs");
+            if(prevInputs){
+                let inputs = JSON.parse(prevInputs);
+                $('#l').val(inputs.l)
+                $('#a').val(inputs.a)
+                $('#c').val(inputs.c)
+                $('#d').val(inputs.d)
+                searchObjects()
+                localStorage.removeItem("inputs")
+            }
+        });
+    </script>
+{% endblock %}
+
